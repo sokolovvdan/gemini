@@ -1,20 +1,24 @@
+from fastapi import FastAPI
+from pydantic import BaseModel
 import os
 import google.generativeai as genai
 
+app = FastAPI()
+
+# Настройка Gemini
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
-# Create the model
 generation_config = {
-  "temperature": 1.9,
-  "top_p": 0.95,
-  "top_k": 40,
-  "max_output_tokens": 8192,
-  "response_mime_type": "text/plain",
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 40,
+    "max_output_tokens": 512,
+    "response_mime_type": "text/plain",
 }
 
 model = genai.GenerativeModel(
-  model_name="gemini-1.5-pro",
-  generation_config=generation_config,
+    model_name="gemini-1.5-pro",
+    generation_config=generation_config,
 )
 
 chat_session = model.start_chat(
@@ -145,12 +149,12 @@ chat_session = model.start_chat(
   ]
 )
 
-def clean_company_name(name: str, website: str):
-    input_text = f"Исходное название компании и ее сайт:\t{name} {website}\tОчищенное название:"
-    response = chat_session.send_message(input_text)
-    print("Очищенное название:", response.text)
+class CleanRequest(BaseModel):
+    name: str
+    website: str = ""
 
-if __name__ == "__main__":
-    company = "Amazing Recruitment Agency LLC"
-    website = "http://www.amazingrecruiters.com"
-    clean_company_name(company, website)
+@app.post("/clean-name")
+async def clean_name(request: CleanRequest):
+    message = f"Исходное название: {request.name}\tСайт: {request.website}\tОчищенное название:"
+    response = chat_session.send_message(message)
+    return {"cleaned": response.text.strip()}
