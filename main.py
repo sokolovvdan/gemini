@@ -5,10 +5,13 @@ import google.generativeai as genai
 
 app = FastAPI()
 
-@app.get("/")
-def ping():
-    return {"status": "API is alive"}
+@app.get("/", include_in_schema=False)
+async def root():
+    return {"status": "OK"}
 
+@app.head("/", include_in_schema=False)
+async def root_head():
+    return
 
 # Настройка Gemini
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
