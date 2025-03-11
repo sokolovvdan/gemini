@@ -5,6 +5,11 @@ import google.generativeai as genai
 
 app = FastAPI()
 
+@app.get("/")
+def ping():
+    return {"status": "API is alive"}
+
+
 # Настройка Gemini
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
