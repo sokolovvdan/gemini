@@ -6,27 +6,27 @@ import os
 # Инициализация FastAPI
 app = FastAPI()
 
-# Пустой ответ для Render (чтобы не падал)
+# ✅ Добавлен GET / и HEAD /, чтобы Render не давал 404
 @app.get("/", include_in_schema=False)
 def root():
-    return {"status": "OK"}
+    return {"status": "API is alive"}
 
 @app.head("/", include_in_schema=False)
 def root_head():
     return
 
-# Модель запроса
+# 🔹 Модель запроса
 class CleanRequest(BaseModel):
     name: str
     website: str = ""
 
-# Конфигурация Gemini (замени на свой ключ)
+# 🔹 Подключение Gemini API (замени на свой ключ в Render Variables)
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 model = genai.GenerativeModel("gemini-pro")
 chat_session = model.start_chat()
 
-# Основной роут
+# 🔹 Основной эндпоинт
 @app.post("/clean-name")
 async def clean_name(request: CleanRequest):
     message = f"Исходное название: {request.name}\tСайт: {request.website}\tОчищенное название:"
